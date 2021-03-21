@@ -28,11 +28,13 @@ export default class OptionsValidator {
 			} else if (!OptionsValidator.ObjectIsOptionsObject(key)) {
 				return OptionsValidator.ValidateOptions(OPTIONS[key], TEMPLATE[key]);
 			}
+			OptionsValidator.ValidateRequired(OPTIONS, TEMPLATE, key);
 			OptionsValidator.ValidateMinValue(OPTIONS, TEMPLATE, key);
 			OptionsValidator.ValidateMaxValue(OPTIONS, TEMPLATE, key);
 			OptionsValidator.ValidateMinLength(OPTIONS, TEMPLATE, key);
 			OptionsValidator.ValidateMaxLength(OPTIONS, TEMPLATE, key);
 			OptionsValidator.ValidateAcceptedValues(OPTIONS, TEMPLATE, key);
+			OptionsValidator.ValidateNotAcceptedValues(OPTIONS, TEMPLATE, key);
 			OptionsValidator.ValidateRegexFormat(OPTIONS, TEMPLATE, key);
 		}
 	}
@@ -57,6 +59,17 @@ export default class OptionsValidator {
 				);
 			}
 		}
+	}
+
+	static ValidateRequired(OPTIONS, TEMPLATE, key) {
+		if (TEMPLATE[key].required === undefined) {
+			return;
+		}
+		if (TEMPLATE[key].required === true && key in OPTIONS) {
+			return;
+		}
+
+		throw new OptionsValidatorException(`Key'${key}' requires a value.`);
 	}
 
 	static ValidateMinValue(OPTIONS, TEMPLATE, key) {
@@ -116,6 +129,17 @@ export default class OptionsValidator {
 				key
 			].acceptedValues.join(', ')}.`
 		);
+	}
+
+	static ValidateNotAcceptedValues(OPTIONS, TEMPLATE, key) {
+		if (TEMPLATE[key].notAcceptedValues === undefined) {
+			return;
+		}
+		if (!TEMPLATE[key].notAcceptedValues.includes(OPTIONS[key])) {
+			return;
+		}
+
+		throw new OptionsValidatorException(`Value '${OPTIONS[key]}' is not allowed as an option for '${key}'.`);
 	}
 
 	static ValidateRegexFormat(OPTIONS, TEMPLATE, key) {
