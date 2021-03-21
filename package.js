@@ -38,21 +38,25 @@ class OptionsValidator {
 	}
 
 	static ValidateType(OPTIONS, TEMPLATE, key) {
-		if (TEMPLATE[key] !== 'object') {
-			if (TEMPLATE[key] !== OPTIONS[key]) {
+		if (typeof TEMPLATE[key] !== 'object') {
+			if (TEMPLATE[key] !== typeof OPTIONS[key]) {
 				throw new OptionsValidatorException(
-					`Value of '${key}' was expected to be of type '${TEMPLATE[key].name}'.`
+					`Value of '${key}' was expected to be of type '${
+						TEMPLATE[key][0].toUpperCase() + TEMPLATE[key].slice(1)
+					}'.`
 				);
-            }
-        } else {
-            if (TEMPLATE[key].type === undefined) {
-                throw new OptionsValidatorException(`Template option 'type' cannot be 'undefined'.`);
-            } else if (TEMPLATE[key].type !== OPTIONS[key]) {
-                throw new OptionsValidatorException(
-					`Value of '${key}' was expected to be of type '${TEMPLATE[key].name}'.`
+			}
+		} else {
+			if (TEMPLATE[key].type === undefined) {
+				throw new OptionsValidatorException(`Template option 'type' cannot be 'undefined'.`);
+			} else if (TEMPLATE[key].type !== OPTIONS[key]) {
+				throw new OptionsValidatorException(
+					`Value of '${key}' was expected to be of type '${
+						TEMPLATE[key][0].toUpperCase() + TEMPLATE[key].slice(1)
+					}'.`
 				);
-            }
-        }
+			}
+		}
 	}
 
 	static ValidateMinValue(OPTIONS, TEMPLATE, key) {
@@ -135,54 +139,3 @@ class OptionsValidatorException extends Error {
 }
 
 module.exports = OptionsValidator;
-/*
-OPTIONS_TEMPLATE = {
-	debug: Boolean,
-	channelName: String,
-	client: {
-		type: Discord.Client,
-	},
-	commandPrefix: {
-		type: String,
-		minLength: 0,
-		maxLength: 1,
-	},
-	command: {
-		type: String,
-		minLength: 0,
-		maxLength: 6,
-	},
-	botColor: {
-		type: String,
-		regexFormat: /#\d{3|6}/,
-	},
-	auth: {
-		client_id: {
-			type: String,
-		},
-		token: {
-			type: String,
-		},
-	},
-	override: {
-		showCallstack: Boolean,
-		multiEmbedControlAuthorOnly: Boolean,
-		commandPrefixMaxLength: {
-			type: Number,
-			minValue: 0,
-		},
-		commandMaxLength: {
-			type: Number,
-			minValue: 0,
-		},
-		defaultLogCount: {
-			type: Number,
-			minValue: 1,
-		},
-		dateFormat: {
-			type: String,
-			acceptedValues: ['EU', 'ISO', 'US'],
-		},
-	},
-};
-*/
