@@ -1,4 +1,4 @@
-class OptionsValidator {
+export default class OptionsValidator {
 	TEMPLATE;
 	OPTIONS;
 
@@ -137,5 +137,3 @@ class OptionsValidatorException extends Error {
 		this.name = 'OptionsValidatorException';
 	}
 }
-
-module.exports = OptionsValidator;
