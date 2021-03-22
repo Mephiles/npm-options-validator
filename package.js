@@ -42,9 +42,11 @@ export default class OptionsValidator {
 	static ValidateType(OPTIONS, TEMPLATE, key) {
 		if (typeof TEMPLATE[key] !== 'object') {
 			if (
-				TEMPLATE[key] !== typeof OPTIONS[key] ||
-				(TEMPLATE[key] === 'folder-path' && OptionsValidator.IsFolderPath(key, OPTIONS[key])) ||
-				(TEMPLATE[key] === 'file-path' && OptionsValidator.IsFilePath(key, OPTIONS[key]))
+				(TEMPLATE[key] === 'list' && OptionsValidator.ListIsCorrect(TEMPLATE[key], OPTIONS[key])) ||
+				(TEMPLATE[key] === 'file-path' && OptionsValidator.IsFilePath(key, OPTIONS[key]))(
+					TEMPLATE[key] === 'folder-path' && OptionsValidator.IsFolderPath(key, OPTIONS[key])
+				) ||
+				TEMPLATE[key] !== typeof OPTIONS[key]
 			) {
 				throw new OptionsValidatorException(
 					`Value of '${key}' was expected to be of type '${
@@ -146,8 +148,6 @@ export default class OptionsValidator {
 		throw new OptionsValidatorException(`Value '${OPTIONS[key]}' is not allowed as an option for '${key}'.`);
 	}
 
-	// Regex
-
 	static ValidateRegexFormat(OPTIONS, TEMPLATE, key) {
 		if (TEMPLATE[key].regexFormat === undefined) {
 			return;
@@ -159,6 +159,8 @@ export default class OptionsValidator {
 
 		throw new OptionsValidatorException(`Value of '${key}' does not match expected format.`);
 	}
+
+	// Helper functions
 
 	static IsFolderPath(key, path) {
 		const regexTester = new RegExp(/^(\/{1}|[A-Za-z]{1})([A-Za-z0-9\/]*)$/);
@@ -176,6 +178,42 @@ export default class OptionsValidator {
 		}
 
 		throw new OptionsValidatorException(`'${path}' is not a valid file path for '${key}'.`);
+	}
+
+	static ListIsCorrect(template, list) {
+		if (!Array.isArray(list)) {
+			return false;
+		}
+
+		if ('listContents' in template && !OptionsValidator.ListItemsAreCorrect(template.listContents, list)) {
+			return false;
+		}
+		return true;
+	}
+
+	static ListItemsAreCorrect(itemType, list) {
+		for (const item of list) {
+			switch (itemType) {
+				case 'folder-path':
+					if (!OptionsValidator.IsFolderPath(item)) {
+						return false;
+					}
+					break;
+				case 'file-path':
+					if (!OptionsValidator.IsFilePath(item)) {
+						return false;
+					}
+					break;
+				case 'object':
+					//TODO: Might need to do something special here some day
+					break;
+				default:
+					if (typeof item !== itemType) {
+						return false;
+					}
+			}
+		}
+		return true;
 	}
 }
 
