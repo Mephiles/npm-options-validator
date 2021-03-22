@@ -41,7 +41,11 @@ export default class OptionsValidator {
 
 	static ValidateType(OPTIONS, TEMPLATE, key) {
 		if (typeof TEMPLATE[key] !== 'object') {
-			if (TEMPLATE[key] !== typeof OPTIONS[key]) {
+			if (
+				TEMPLATE[key] !== typeof OPTIONS[key] ||
+				(TEMPLATE[key] === 'folder-path' && OptionsValidator.IsFolderPath(key, OPTIONS[key])) ||
+				(TEMPLATE[key] === 'file-path' && OptionsValidator.IsFilePath(key, OPTIONS[key]))
+			) {
 				throw new OptionsValidatorException(
 					`Value of '${key}' was expected to be of type '${
 						TEMPLATE[key][0].toUpperCase() + TEMPLATE[key].slice(1)
@@ -142,6 +146,8 @@ export default class OptionsValidator {
 		throw new OptionsValidatorException(`Value '${OPTIONS[key]}' is not allowed as an option for '${key}'.`);
 	}
 
+	// Regex
+
 	static ValidateRegexFormat(OPTIONS, TEMPLATE, key) {
 		if (TEMPLATE[key].regexFormat === undefined) {
 			return;
@@ -152,6 +158,24 @@ export default class OptionsValidator {
 		}
 
 		throw new OptionsValidatorException(`Value of '${key}' does not match expected format.`);
+	}
+
+	static IsFolderPath(key, path) {
+		const regexTester = new RegExp(/^(\/{1}|[A-Za-z]{1})([A-Za-z0-9\/]*)$/);
+		if (regexTester.test(path)) {
+			return;
+		}
+
+		throw new OptionsValidatorException(`'${path}' is not a valid folder path for '${key}'.`);
+	}
+
+	static IsFilePath(key, path) {
+		const regexTester = new RegExp(/^(\/{1}|[A-Za-z]{1})([A-Za-z0-9\/]*)\.([A-Z-a-z]{1,})$/);
+		if (regexTester.test(path)) {
+			return;
+		}
+
+		throw new OptionsValidatorException(`'${path}' is not a valid file path for '${key}'.`);
 	}
 }
 
